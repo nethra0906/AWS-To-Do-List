@@ -1,7 +1,6 @@
 # 📝 AWS Serverless To-Do Application
 
-This project is a simple **To-Do List web application** deployed on **AWS Cloud** using a **serverless architecture**.  
-It allows users to add, update, and delete tasks, with data stored securely in **DynamoDB**.
+A fully serverless task management web app deployed on AWS using S3 for hosting, API Gateway for REST endpoints, Lambda for backend logic, and DynamoDB for data persistence. Users can add, update, and delete tasks in real time through a responsive interface.
 
 ---
 
