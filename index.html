@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My To-Do List</title>
+  <link rel="icon" type="image/png" href="Web-Logo.png">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #a8edea, #fed6e3);
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      width: 350px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .container:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.15);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-size: 1.8em;
+      color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .input-area {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    input:focus {
+      border-color: #007bff;
+    }
+
+    button {
+      padding: 10px 14px;
+      background: linear-gradient(135deg, #007bff, #00b4d8);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s;
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #0056b3, #0096c7);
+      transform: scale(1.05);
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+
+    li {
+      background: #f9f9f9;
+      margin: 8px 0;
+      padding: 10px 14px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      gap: 8px;
+    }
+
+    li:hover {
+      background: #eef4ff;
+      transform: translateY(-2px);
+    }
+
+    .done {
+      text-decoration: line-through;
+      color: #999;
+    }
+
+    .delete-btn {
+      background: transparent;
+      border: none;
+      color: #e63946;
+      font-weight: bold;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .delete-btn:hover {
+      color: #b22222;
+    }
+
+    .done-btn {
+      background: transparent;
+      border: none;
+      color: #2a9d8f;
+      font-weight: bold;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .done-btn:hover {
+      color: #1d6f63;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>✅ My To-Do List</h1>
+    <div class="input-area">
+      <input id="taskInput" placeholder="Enter a new task" />
+      <button onclick="addTask()">Add</button>
+    </div>
+    <ul id="taskList"></ul>
+  </div>
+
+  <script>
+    const input = document.getElementById("taskInput");
+    const list = document.getElementById("taskList");
+
+    function addTask() {
+      const taskText = input.value.trim();
+      if (!taskText) return alert("Please enter a task!");
+
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <span class="task-text">${taskText}</span>
+        <div>
+          <button class="done-btn" onclick="toggleDone(this)">✅</button>
+          <button class="delete-btn" onclick="deleteTask(this)">✖</button>
+        </div>
+      `;
+      list.appendChild(li);
+      input.value = "";
+    }
+
+    function toggleDone(btn) {
+      const task = btn.parentElement.parentElement.querySelector(".task-text");
+      task.classList.toggle("done");
+    }
+
+    function deleteTask(btn) {
+      btn.parentElement.parentElement.remove();
+    }
+  </script>
+</body>
+</html>
