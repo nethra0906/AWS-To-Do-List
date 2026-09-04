@@ -1,0 +1,121 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Serverless to-do list: API Gateway (REST) -> Lambda -> DynamoDB.
+  Deploy with the AWS SAM CLI (see README.md). Frontend static assets
+  (index.html/style.css/script.js/config.js) are hosted separately from
+  an S3 bucket created by this stack.
+
+Parameters:
+  AllowedOrigin:
+    Type: String
+    Default: "*"
+    Description: >
+      Value returned in Access-Control-Allow-Origin. Restrict this to your
+      website's origin (e.g. https://example.com) once you know it -
+      "*" is fine for local development but allows any site to call the API.
+
+Globals:
+  Function:
+    Timeout: 10
+    MemorySize: 128
+    Runtime: python3.12
+
+Resources:
+  ToDoTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${AWS::StackName}-tasks"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: taskId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: taskId
+          KeyType: HASH
+
+  ToDoApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub "${AWS::StackName}-api"
+      StageName: prod
+
+  ToDoFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: lambda_function.lambda_handler
+      CodeUri: ./
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref ToDoTable
+          ALLOWED_ORIGIN: !Ref AllowedOrigin
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ToDoTable
+      Events:
+        Get:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ToDoApi
+            Path: /
+            Method: GET
+        Post:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ToDoApi
+            Path: /
+            Method: POST
+        Put:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ToDoApi
+            Path: /
+            Method: PUT
+        Delete:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ToDoApi
+            Path: /
+            Method: DELETE
+        Options:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ToDoApi
+            Path: /
+            Method: OPTIONS
+
+  WebsiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::StackName}-website-${AWS::AccountId}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+
+  WebsiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebsiteBucket
+      PolicyDocument:
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action: s3:GetObject
+            Resource: !Sub "${WebsiteBucket.Arn}/*"
+
+Outputs:
+  ApiUrl:
+    Description: Base URL to put in config.js as APP_CONFIG.API_BASE_URL
+    Value: !Sub "https://${ToDoApi}.execute-api.${AWS::Region}.amazonaws.com/prod"
+  WebsiteUrl:
+    Description: S3 static website URL for the frontend
+    Value: !GetAtt WebsiteBucket.WebsiteURL
+  TableName:
+    Description: DynamoDB table name
+    Value: !Ref ToDoTable
